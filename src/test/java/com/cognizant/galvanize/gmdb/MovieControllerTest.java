@@ -8,6 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 
 import javax.transaction.Transactional;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,18 +53,21 @@ public class MovieControllerTest {
     @Transactional
     @Rollback
     public void testIfNewMovieAddedThenSeeMovieDetailsInGetMovieOperation() throws Exception {
-        String requestBody = "{\n" +
-                "    \"email\": \"Jimmy@example.com\",\n" +
-                "    \"password\": \"something-secret\"\n" +
-                "  }";
+        String requestBody =
+                "{\n" +
+                "                \"title\": \"The Avengers\",\n" +
+                "                \"director\": \"Joss Whedon\",\n" +
+                "                \"actors\": \"Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth\",\n" +
+                "                \"release\": \"2012\",\n" +
+                "                \"description\": \"Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.\",\n" +
+                "                \"rating\": \"\"\n" +
+                "}" ;
 
-
-        RequestBuilder requestBuiler = post("/addMovie")
-                .contentType(MediaType.APPLICATION_JSON);
+        RequestBuilder requestBuiler = post("/movie")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody);
         mockMvc.perform(requestBuiler).andExpect(status().isOk())
-                .andExpect(content().string("{\"message\":\"Movie Added\"}"));
-
-
+                .andExpect(jsonPath("$.movieList[0].title", is("The Avengers")));
     }
 
 

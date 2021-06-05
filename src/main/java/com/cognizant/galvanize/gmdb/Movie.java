@@ -35,6 +35,6 @@ public class Movie {
     @JsonProperty
     private String description;
     @JsonProperty
-    private int rating;
+    private String rating;
 
 }

@@ -1,4 +1,4 @@
-CREATE TABLE Movies (
+CREATE TABLE Movie (
     id   INTEGER      NOT NULL,
     title VARCHAR(128) NOT NULL,
     actors VARCHAR(128) NOT NULL,
