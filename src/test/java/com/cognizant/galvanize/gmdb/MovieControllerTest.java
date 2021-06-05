@@ -31,7 +31,7 @@ public class MovieControllerTest {
     @Test
     @Transactional
     @Rollback
-    public void getMoviesList() throws Exception {
+    public void testIfNoMoviesThenGetNoMovieFound() throws Exception {
         RequestBuilder requestBuiler = get("/movies")
                 .contentType(MediaType.APPLICATION_JSON);
         mockMvc.perform(requestBuiler).andExpect(status().isOk())
@@ -39,5 +39,29 @@ public class MovieControllerTest {
 
 
     }
+
+//
+//    Given a new movie has released
+//    When I submit this new movie to GMDB movies
+//    Then I should see that movie in GMDB movies
+
+    @Test
+    @Transactional
+    @Rollback
+    public void testIfNewMovieAddedThenSeeMovieDetailsInGetMovieOperation() throws Exception {
+        String requestBody = "{\n" +
+                "    \"email\": \"Jimmy@example.com\",\n" +
+                "    \"password\": \"something-secret\"\n" +
+                "  }";
+
+
+        RequestBuilder requestBuiler = post("/addMovie")
+                .contentType(MediaType.APPLICATION_JSON);
+        mockMvc.perform(requestBuiler).andExpect(status().isOk())
+                .andExpect(content().string("{\"message\":\"Movie Added\"}"));
+
+
+    }
+
 
 }
