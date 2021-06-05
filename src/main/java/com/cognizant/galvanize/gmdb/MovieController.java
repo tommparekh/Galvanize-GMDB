@@ -22,7 +22,6 @@ public class MovieController {
 
     @GetMapping("/movies/title")
     public MovieResponse getMovies(@RequestParam String title) {
-        //Movie movie = movieRepository.findByTitle(title);
         Iterable<Movie> moviesFound = movieRepository.findAllByTitle(title);
 
         List<Movie> movieList = new ArrayList<>();
@@ -46,7 +45,7 @@ public class MovieController {
                 }
             }
         }
-        if (movieResponse.getMessage()
+        if (movieResponse.getMessage() != null && movieResponse.getMessage()
                 .equalsIgnoreCase(MovieResponse.MESSAGE_EMPTY)) {
             movieResponse.setMovieList(null);
         }
