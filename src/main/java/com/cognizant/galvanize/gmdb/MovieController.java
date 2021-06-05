@@ -14,28 +14,41 @@ public class MovieController {
     private MovieRepository movieRepository;
 
     @GetMapping("/movies")
-    public MovieResponse getMovies(){
+    public MovieResponse getMovies() {
         List<Movie> movieList = new ArrayList<>();
         movieRepository.findAll().forEach(movieList::add);
         return convertToMovieResponse(movieList);
     }
 
     @GetMapping("/movies/title")
-    public MovieResponse getMovies(@RequestParam String title){
-        Movie movie = movieRepository.findByTitle(title);
-        return convertToMovieResponse(Arrays.asList(movie));
+    public MovieResponse getMovies(@RequestParam String title) {
+        //Movie movie = movieRepository.findByTitle(title);
+        Iterable<Movie> moviesFound = movieRepository.findAllByTitle(title);
+
+        List<Movie> movieList = new ArrayList<>();
+        moviesFound.forEach(movieList::add);
+
+        return convertToMovieResponse(movieList);
     }
 
     private MovieResponse convertToMovieResponse(List<Movie> movieList) {
         //List<MovieResponse> movieResponses = new ArrayList<>();
         MovieResponse movieResponse = new MovieResponse();
-        if (movieList == null|| movieList.size()<=0)
-        {
+        if (movieList == null || movieList.size() <= 0) {
             movieResponse.setMessage(MovieResponse.MESSAGE_EMPTY);
-             }
-        else
-        {
-            movieResponse.setMovieList(movieList);
+        } else {
+            for (Movie movie : movieList) {
+                if (movie == null) {
+                    movieResponse.setMessage(MovieResponse.MESSAGE_EMPTY);
+                    break;
+                } else {
+                    movieResponse.setMovieList(movieList);
+                }
+            }
+        }
+        if (movieResponse.getMessage()
+                .equalsIgnoreCase(MovieResponse.MESSAGE_EMPTY)) {
+            movieResponse.setMovieList(null);
         }
         return movieResponse;
     }
