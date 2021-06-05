@@ -12,8 +12,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import javax.transaction.Transactional;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -162,7 +161,7 @@ public class MovieControllerTest {
                 .andExpect(jsonPath("$.movieList[0].actors", is("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden")))
                 .andExpect(jsonPath("$.movieList[0].release", is("2006")))
                 .andExpect(jsonPath("$.movieList[0].description", is("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.")));
-     }
+    }
 
 //    Given the GMDB has many movies
 //    When I visit GMDB movies with a non-existing title
@@ -244,7 +243,117 @@ public class MovieControllerTest {
                 .andExpect(jsonPath("$.movieList[1].release", is("2012")))
                 .andExpect(jsonPath("$.movieList[1].description", is("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.")));
 
-        ;
     }
 
+    //    Given an existing movie
+//    When I submit a 5 star rating
+//    Then I can see it in the movie details.
+    @Test
+    @Transactional
+    @Rollback
+    public void testWhenUserAddsARatingThenWeSeeRatingInMovieDetails() throws Exception {
+        Movie movie = new Movie();
+        movie.setTitle("The Avengers");
+        movie.setDirector("Joss Whedon");
+        movie.setActors("Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth");
+        movie.setRelease("2012");
+        movie.setDescription("Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.");
+
+        Movie movie2 = new Movie();
+        movie2.setTitle("Superman Returns");
+        movie2.setDirector("Bryan Singer");
+        movie2.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie2.setRelease("2006");
+        movie2.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        Movie movie3 = new Movie();
+        movie3.setTitle("Superman Returns");
+        movie3.setDirector("New Director");
+        movie3.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie3.setRelease("2012");
+        movie3.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        movieRepository.save(movie);
+        movieRepository.save(movie2);
+        movieRepository.save(movie3);
+
+        String requestBody =
+                "{\n" +
+                        "                \"rating\": \"5\"\n" +
+                        "}";
+
+        // Act & Assert
+        RequestBuilder requestBuilder = patch("/movie/rating")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("title", "The Avengers")
+                .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+                .andExpect(jsonPath("$.movieList[0].title", is("The Avengers")))
+                .andExpect(jsonPath("$.movieList[0].rating", is("5")));
+
+    }
+
+
+    //
+//    Given a movie with one 5 star rating and one 3 star rating
+//    When I view the movie details
+//    Then I expect the star rating to be 4.
+    @Test
+    @Transactional
+    @Rollback
+    public void testWhenUserAddsARatingThenWeSeeAnAverageRatingInMovieDetails() throws Exception {
+        Movie movie = new Movie();
+        movie.setTitle("The Avengers");
+        movie.setDirector("Joss Whedon");
+        movie.setActors("Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth");
+        movie.setRelease("2012");
+        movie.setDescription("Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.");
+
+        Movie movie2 = new Movie();
+        movie2.setTitle("Superman Returns");
+        movie2.setDirector("Bryan Singer");
+        movie2.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie2.setRelease("2006");
+        movie2.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        Movie movie3 = new Movie();
+        movie3.setTitle("Superman Returns");
+        movie3.setDirector("New Director");
+        movie3.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie3.setRelease("2012");
+        movie3.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        movieRepository.save(movie);
+        movieRepository.save(movie2);
+        movieRepository.save(movie3);
+
+        String requestBody =
+                "{\n" +
+                        "                \"rating\": \"5\"\n" +
+                        "}";
+
+        // Act & Assert
+        RequestBuilder requestBuilder = patch("/movie/rating")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("title", "The Avengers")
+                .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+                .andExpect(jsonPath("$.movieList[0].title", is("The Avengers")))
+                .andExpect(jsonPath("$.movieList[0].rating", is("5")));
+
+        requestBody =
+                "{\n" +
+                        "                \"rating\": \"3\"\n" +
+                        "}";
+
+        // Act & Assert
+        requestBuilder = patch("/movie/rating")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("title", "The Avengers")
+                .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+                .andExpect(jsonPath("$.movieList[0].title", is("The Avengers")))
+                .andExpect(jsonPath("$.movieList[0].rating", is("4")));
+
+    }
 }

@@ -17,6 +17,7 @@ import java.util.List;
 @Setter
 public class MovieResponse {
     public static final String MESSAGE_EMPTY = "no movies found";
+    public static final String MESSAGE_MULTIPLE_VALUES_FOUND = "Request Not Successfull : Multiple Values Found";
     @JsonProperty
     String message;
 
