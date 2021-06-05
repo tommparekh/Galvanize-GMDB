@@ -4,5 +4,6 @@ CREATE TABLE Movies (
     actors VARCHAR(128) NOT NULL,
     release VARCHAR(10) NOT NULL,
     description VARCHAR(128) NOT NULL,
-    rating INTEGER
+    rating INTEGER,
+    director VARCHAR(128) NOT NULL
     );
