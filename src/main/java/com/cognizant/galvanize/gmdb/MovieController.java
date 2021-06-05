@@ -15,8 +15,7 @@ public class MovieController {
 
     @GetMapping("/movies")
     public MovieResponse getMovies() {
-        List<Movie> movieList = new ArrayList<>();
-        movieRepository.findAll().forEach(movieList::add);
+        List<Movie> movieList = convertToMovieList(movieRepository.findAll());
         return convertToMovieResponse(movieList, MovieResponse.MESSAGE_EMPTY);
     }
 
@@ -24,8 +23,7 @@ public class MovieController {
     public MovieResponse getMovies(@RequestParam String title) {
         Iterable<Movie> moviesFound = movieRepository.findAllByTitle(title);
 
-        List<Movie> movieList = new ArrayList<>();
-        moviesFound.forEach(movieList::add);
+        List<Movie> movieList = convertToMovieList(moviesFound);
 
         return convertToMovieResponse(movieList, MovieResponse.MESSAGE_EMPTY);
     }
@@ -62,39 +60,95 @@ public class MovieController {
     public MovieResponse addRating(@RequestParam String title, @RequestBody Movie movie) {
 
         Iterable<Movie> moviesFound = movieRepository.findAllByTitle(title);
-        List<Movie> movieList = new ArrayList<>();
-        moviesFound.forEach(movieList::add);
+        List<Movie> movieList = convertToMovieList(moviesFound);
         Movie movieFound = null;
-        if (movieList == null) {
-            return convertToMovieResponse(null, MovieResponse.MESSAGE_EMPTY);
-        }
-        if (movieList.size() > 1) {
-            return convertToMovieResponse(null, MovieResponse.MESSAGE_MULTIPLE_VALUES_FOUND);
 
-        }
+        MovieResponse MESSAGE_EMPTY = checkForErrorCondition(movieList);
+        if (MESSAGE_EMPTY != null) return MESSAGE_EMPTY;
+
         movieFound = movieList.get(0);
 
 //        Movie movieFound = movieRepository.findByTitle(title);
         if (movieFound != null) {
-            int rating = 0;
-
-            if (movie.getRating() != null) {
-                rating = Integer.valueOf(movie.getRating());
-
-            }
-
-            if (movieFound.getRating() != null) {
-                rating += Integer.valueOf(movieFound.getRating());
-                rating /= 2;
-            }
-
-
-            movieFound.setRating(String.valueOf(rating));
-
-
+            movieFound = updateMovieRating(movie, movieFound);
         }
         movieRepository.save(movieFound);
 
         return convertToMovieResponse(Arrays.asList(movieFound), MovieResponse.MESSAGE_EMPTY);
+    }
+
+
+    @PatchMapping("/movie/reviews")
+    public MovieResponse addReviews(@RequestParam String title, @RequestBody Movie movie) {
+
+        Iterable<Movie> moviesFound = movieRepository.findAllByTitle(title);
+        List<Movie> movieList = convertToMovieList(moviesFound);
+
+        MovieResponse MESSAGE_EMPTY = checkForErrorCondition(movieList);
+
+        if (MESSAGE_EMPTY != null) return MESSAGE_EMPTY;
+
+        Movie movieFound = movieList.get(0);
+
+        if (movie.getRating() == null) {
+            return convertToMovieResponse(null, MovieResponse.MESSAGE_RATING_REQUIRED);
+        }
+
+        if (movieFound != null) {
+            movieFound = updateMovieRating(movie, movieFound);
+            movieFound = addMovieReview(movie, movieFound);
+        }
+        movieRepository.save(movieFound);
+
+        return convertToMovieResponse(Arrays.asList(movieFound), MovieResponse.MESSAGE_EMPTY);
+    }
+
+    private Movie addMovieReview(Movie movie, Movie movieFound) {
+        movieFound.setReviews(movie.getReviews());
+
+//
+//        if (movie.getReviews() != null) {
+//            if (movieFound.getReviews() == null) {
+//                movieFound.setReviews(movie.getReviews());
+//                List<String> reviewList = new ArrayList<>();
+//                movie.getReviews().forEach(reviewList::add);
+//            } else {
+//                movie.getReviews().forEach(movieFound.getReviews()::add);
+//            }
+//        }
+        return movieFound;
+    }
+
+    private Movie updateMovieRating(Movie movie, Movie movieFound) {
+        int rating = 0;
+
+        if (movie.getRating() != null) {
+            rating = Integer.valueOf(movie.getRating());
+        }
+
+        if (movieFound.getRating() != null) {
+            rating += Integer.valueOf(movieFound.getRating());
+            rating /= 2;
+        }
+
+        movieFound.setRating(String.valueOf(rating));
+        return movieFound;
+    }
+
+    private MovieResponse checkForErrorCondition(List<Movie> movieList) {
+        if (movieList == null) {
+            return convertToMovieResponse(null, MovieResponse.MESSAGE_EMPTY);
+        }
+
+        if (movieList.size() > 1) {
+            return convertToMovieResponse(null, MovieResponse.MESSAGE_MULTIPLE_VALUES_FOUND);
+        }
+        return null;
+    }
+
+    private List<Movie> convertToMovieList(Iterable<Movie> moviesFound) {
+        List<Movie> movieList = new ArrayList<>();
+        moviesFound.forEach(movieList::add);
+        return movieList;
     }
 }

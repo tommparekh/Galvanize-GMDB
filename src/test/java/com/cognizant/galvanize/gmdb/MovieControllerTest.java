@@ -356,4 +356,102 @@ public class MovieControllerTest {
                 .andExpect(jsonPath("$.movieList[0].rating", is("4")));
 
     }
+
+//    Given an existing movie
+//    When I submit a star rating and text review
+//    Then I can see my contribution on the movie details.
+
+    @Test
+    @Transactional
+    @Rollback
+    public void testWhenUserAddsARatingAndReviewThenSeeDetailsInMovieDetails() throws Exception {
+        Movie movie = new Movie();
+        movie.setTitle("The Avengers");
+        movie.setDirector("Joss Whedon");
+        movie.setActors("Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth");
+        movie.setRelease("2012");
+        movie.setDescription("Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.");
+
+        Movie movie2 = new Movie();
+        movie2.setTitle("Superman Returns");
+        movie2.setDirector("Bryan Singer");
+        movie2.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie2.setRelease("2006");
+        movie2.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        Movie movie3 = new Movie();
+        movie3.setTitle("Superman Returns");
+        movie3.setDirector("New Director");
+        movie3.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie3.setRelease("2012");
+        movie3.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        movieRepository.save(movie);
+        movieRepository.save(movie2);
+        movieRepository.save(movie3);
+
+        String requestBody =
+                "{\n" +
+                        "                \"reviews\": \"This is a great movie.\"\n" + "," +
+                        "                \"rating\": \"5\"\n" +
+                        "}";
+
+        // Act & Assert
+        RequestBuilder requestBuilder = patch("/movie/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("title", "The Avengers")
+                .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+                .andExpect(jsonPath("$.movieList[0].title", is("The Avengers")))
+                .andExpect(jsonPath("$.movieList[0].rating", is("5")))
+                .andExpect(jsonPath("$.movieList[0].reviews", is("This is a great movie.")));
+
+    }
+
+//    Given an existing movie
+//    When I submit a text review without a star rating
+//    Then I receive a friendly message that a star rating is required.
+
+    @Test
+    @Transactional
+    @Rollback
+    public void testWhenUserAddReviewWithoutRatingThenSeeMessageThatRatingIsRequired() throws Exception {
+        Movie movie = new Movie();
+        movie.setTitle("The Avengers");
+        movie.setDirector("Joss Whedon");
+        movie.setActors("Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth");
+        movie.setRelease("2012");
+        movie.setDescription("Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.");
+
+        Movie movie2 = new Movie();
+        movie2.setTitle("Superman Returns");
+        movie2.setDirector("Bryan Singer");
+        movie2.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie2.setRelease("2006");
+        movie2.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        Movie movie3 = new Movie();
+        movie3.setTitle("Superman Returns");
+        movie3.setDirector("New Director");
+        movie3.setActors("Brandon Routh, Kate Bosworth, Kevin Spacey, James Marsden");
+        movie3.setRelease("2012");
+        movie3.setDescription("Superman returns to Earth after spending five years in space examining his homeworld Krypton. But he finds things have changed while he was gone, and he must once again prove himself important to the world.");
+
+        movieRepository.save(movie);
+        movieRepository.save(movie2);
+        movieRepository.save(movie3);
+
+        String requestBody =
+                "{\n" +
+                        "                \"reviews\": \"This is a great movie.\"\n" +
+                        "}";
+
+        // Act & Assert
+        RequestBuilder requestBuilder = patch("/movie/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("title", "The Avengers")
+                .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", is("Message Rating is Required")));
+    }
 }

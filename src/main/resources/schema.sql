@@ -5,5 +5,6 @@ CREATE TABLE Movie (
     release VARCHAR(10) NOT NULL,
     description VARCHAR(128) NOT NULL,
     rating INTEGER,
-    director VARCHAR(128) NOT NULL
+    director VARCHAR(128) NOT NULL,
+    reviews VARCHAR(1024)
     );

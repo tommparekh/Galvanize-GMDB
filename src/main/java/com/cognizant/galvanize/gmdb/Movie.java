@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.List;
 
 
 @JsonIgnoreProperties
@@ -18,6 +19,25 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Movie {
+    @JsonProperty
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+    @JsonProperty
+    private String title;
+    @JsonProperty
+    private String director;
+    @JsonProperty
+    private String actors;
+    @JsonProperty
+    private String release;
+    @JsonProperty
+    private String description;
+    @JsonProperty
+    private String rating;
+    @JsonProperty
+    private String reviews;
+
     public String getTitle() {
         return title;
     }
@@ -65,22 +85,5 @@ public class Movie {
     public void setRating(String rating) {
         this.rating = rating;
     }
-
-    @JsonProperty
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
-    @JsonProperty
-    private String title;
-    @JsonProperty
-    private String director;
-    @JsonProperty
-    private String actors;
-    @JsonProperty
-    private String release;
-    @JsonProperty
-    private String description;
-    @JsonProperty
-    private String rating;
 
 }
